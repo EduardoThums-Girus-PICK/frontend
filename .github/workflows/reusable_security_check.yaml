@@ -1,0 +1,46 @@
+name: Security check the code and the builded docker image
+
+on:
+  workflow_call:
+
+jobs:
+  security-check:
+  # runs-on: ubuntu-latest
+    runs-on: self-hosted
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d # v0.2.3
+        with:
+          version: v0.62.0
+          cache: true
+
+      - name: Analisar as vulnerabilidades no código
+        shell: bash
+        run: trivy filesystem --exit-code 1 ./
+
+      - name: Validar as boas práticas no Dockerfile
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+
+      - name: Build image
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0 # v6.17.0
+        id: build
+        with:
+          push: false
+          tags: eduardothums/girus:${{ github.sha }}
+          load: true
+
+      - name: Analisar as vulnerabilidades na imagem
+        shell: bash
+        run: trivy image eduardothums/girus:${{ github.sha }}
