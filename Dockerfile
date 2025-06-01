@@ -21,13 +21,14 @@ RUN npm run build
 FROM cgr.dev/chainguard/nginx:latest@sha256:8f363d198264b1b799704507065a7f9992ad330e40d6e30aff6a51cabfd0ee50
 
 ARG revision
+ARG version
 
 LABEL \
   org.opencontainers.image.title="Girus Frontend" \
   org.opencontainers.image.description="Frontend for the Girus application" \
   org.opencontainers.image.authors="Eduardo Thums <eduardocristiano01@gmail.com>" \
   org.opencontainers.image.licenses="MIT" \
-  org.opencontainers.image.version="1.0.0" \
+  org.opencontainers.image.version="$version" \
   org.opencontainers.image.url="https://linuxtips.io/girus-labs/" \
   org.opencontainers.image.source="https://github.com/EduardoThums-Girus-PICK/frontend" \
   org.opencontainers.image.documentation="https://github.com/EduardoThums-Girus-PICK/frontend/README.md" \
