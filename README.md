@@ -55,7 +55,7 @@ Ao executar a aplicação via docker não será possível criar os laboratórios
 1. Crie o container docker
 
 ```bash
-docker container run -d -p 8000:8080 --name girus-frontend eduardothums/girus:frontend-v1.0.6
+docker container run -d -p 8000:8080 --name girus-frontend eduardothums/girus:frontend-v1.0.8
 ```
 
 2. Verifique que o container esta rodando
@@ -75,86 +75,122 @@ Para executar a aplicação via kubectl é recomendável executar primeiramente 
 ```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
-kind: ServiceAccount
+kind: ConfigMap
 metadata:
-  name: girus-sa
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: girus-cluster-rolebinding
-subjects:
-  - kind: ServiceAccount
-    name: girus-sa
-    namespace: default
-roleRef:
-  kind: ClusterRole
-  name: cluster-admin
-  apiGroup: rbac.authorization.k8s.io
+  name: nginx-config
+data:
+  default.conf: |
+    server {
+        listen 8080;
+        server_name localhost;
+        root /usr/share/nginx/html;
+        index index.html;
+        
+        # Compressão
+        gzip on;
+        gzip_vary on;
+        gzip_min_length 1000;
+        gzip_proxied any;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+        gzip_comp_level 6;
+        
+        # Cache para recursos estáticos
+        location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+            expires 30d;
+            add_header Cache-Control "public, no-transform";
+        }
+        
+        # Redirecionar todas as requisições API para o backend
+        location /api/ {
+            proxy_pass http://girus-backend:8080/api/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_buffering off;
+            proxy_request_buffering off;
+        }
+        
+        # Configuração para WebSockets
+        location /ws/ {
+            proxy_pass http://girus-backend:8080/ws/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_read_timeout 86400;
+        }
+        
+        # Configuração para React Router
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: girus-backend
+  name: girus-frontend
   labels:
-    app: girus-backend
-    app.kubernetes.io/part-of: girus
+    app: girus-frontend
 spec:
-  serviceAccountName: girus-sa
   containers:
-  - name: backend
-    image: eduardothums/girus:backend-v1.0.1
-    env:
-    - name: PORT
-      value: "8080"
-    - name: GIN_MODE
-      value: "release"
-    ports:
-      - containerPort: 8080
+    - name: frontend
+      image: eduardothums/girus:frontend-v1.0.8
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 8080
+      volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+  volumes:
+    - name: nginx-config
+      configMap:
+        name: nginx-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: girus-backend
+  name: girus-frontend
 spec:
   selector:
-    app: girus-backend
+    app: girus-frontend
   ports:
     - port: 8080
-  type: ClusterIP
 EOF
 ```
 
 2. Aguarde até que o pod tenha inicializado
 
 ```bash
-kubectl wait pod --all --for=condition=Ready -l app.kubernetes.io/part-of=girus --timeout 60s
+kubectl wait pod --all --for=condition=Ready -l app=girus-frontend --timeout 60s
 ```
 
 3. Inspecione os logs do pod
 
 ```bash
-kubectl logs girus-backend
+kubectl logs girus-frontend
 ```
 
-4. Faça um port-foward para ser possivel chamar a API através do localhost
+4. Faça um port-foward para ser possivel chamar o frontend através do localhost
 
 ```bash
-kubectl port-forward services/girus-backend 8080:8080
+kubectl port-forward services/girus-frontend 8000:8080
 ```
 
-5. Em outro terminal chame a API no endpoint de healthcheck
-
-```bash
-curl http://localhost:8080/api/v1/health
-```
+5. Acesse o frontend no endereço http://localhost:8000
 
 ## Como verificar a sua assinatura
 
 Para verificar a autenticidade da imagem é possível utilizar o programa `cosign` utilizando a parte pública da chave utilizada para assinar a imagem.
 
 ```bash
-cosign verify --key https://raw.githubusercontent.com/EduardoThums-Girus-PICK/cosign-pub-key/refs/heads/main/cosign.pub eduardothums/girus:frontend-v1.0.6
+cosign verify --key https://raw.githubusercontent.com/EduardoThums-Girus-PICK/cosign-pub-key/refs/heads/main/cosign.pub eduardothums/girus:frontend-v1.0.8
 ```
 
 ## Sobre a construção da imagem
