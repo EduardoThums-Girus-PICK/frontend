@@ -36,7 +36,7 @@ LABEL \
   org.opencontainers.image.documentation="https://github.com/EduardoThums-Girus-PICK/frontend/README.md" \
   org.opencontainers.image.revision="$revision"
 
-COPY --from=healthcheck_builder /healthcheck /usr/local/bin/healthcheck
+COPY --from=healthcheck_builder /app/healthcheck /usr/local/bin/healthcheck
 COPY --from=builder /app/build /usr/share/nginx/html
 
 EXPOSE 8080
