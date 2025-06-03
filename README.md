@@ -68,9 +68,15 @@ docker ps | grep girus-frontend
 
 ### Executando via kubectl
 
-Para executar a aplicação via kubectl é recomendável executar primeiramente o backend, para isso veja a documentação de como o faze-lo [aqui](https://github.com/EduardoThums-Girus-PICK/backend?tab=readme-ov-file#como-executar-a-imagem). 
+**IMPORTANTE ⚠️:** Para executar a aplicação via kubectl é obrigatório executar primeiramente o backend, para isso veja a documentação de como o faze-lo [aqui](https://github.com/EduardoThums-Girus-PICK/backend?tab=readme-ov-file#como-executar-a-imagem). 
 
-1. Aplique o manifesto que cria o `ConfigMap` com a configuração do nginx e `Pod` 
+1. Crie que namespace `girus`
+
+```bash
+kubectl create namespace girus
+```
+
+2. Aplique o manifesto que cria o `ConfigMap` com a configuração do nginx e `Pod` 
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -78,6 +84,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-config
+  namespace: girus
 data:
   default.conf: |
     server {
@@ -104,12 +111,12 @@ data:
         location /api/ {
             proxy_pass http://girus-backend:8080/api/;
             proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Upgrade \$http_upgrade;
             proxy_set_header Connection "upgrade";
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
             proxy_buffering off;
             proxy_request_buffering off;
         }
@@ -118,17 +125,17 @@ data:
         location /ws/ {
             proxy_pass http://girus-backend:8080/ws/;
             proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Upgrade \$http_upgrade;
             proxy_set_header Connection "upgrade";
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
             proxy_read_timeout 86400;
         }
         
         # Configuração para React Router
         location / {
-            try_files $uri $uri/ /index.html;
+            try_files \$uri \$uri/ /index.html;
         }
     }
 ---
@@ -136,6 +143,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: girus-frontend
+  namespace: girus
   labels:
     app: girus-frontend
 spec:
@@ -157,6 +165,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: girus-frontend
+  namespace: girus
 spec:
   selector:
     app: girus-frontend
@@ -165,25 +174,25 @@ spec:
 EOF
 ```
 
-2. Aguarde até que o pod tenha inicializado
+3. Aguarde até que o pod tenha inicializado
 
 ```bash
-kubectl wait pod --all --for=condition=Ready -l app=girus-frontend --timeout 60s
+kubectl -n girus wait pod --all --for=condition=Ready -l app=girus-frontend --timeout 60s
 ```
 
-3. Inspecione os logs do pod
+4. Inspecione os logs do pod
 
 ```bash
-kubectl logs girus-frontend
+kubectl -n girus logs girus-frontend
 ```
 
-4. Faça um port-foward para ser possivel chamar o frontend através do localhost
+5. Faça um port-foward para ser possivel chamar o frontend através do localhost
 
 ```bash
-kubectl port-forward services/girus-frontend 8000:8080
+kubectl -n girus port-forward services/girus-frontend 8000:8080
 ```
 
-5. Acesse o frontend no endereço http://localhost:8000
+6. Acesse o frontend no endereço http://localhost:8000
 
 ## Como verificar a sua assinatura
 
