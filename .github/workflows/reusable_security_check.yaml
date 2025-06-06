@@ -4,6 +4,24 @@ on:
   workflow_call:
 
 jobs:
+  npm-audit:
+    runs-on: self-hosted
+
+    step:
+      - name: Configure node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 #v4.4.0
+        with:
+          node-version: 24.1.0
+
+      - name: Run npm audit to find vulnerabilities on dependencies
+        shell: bash
+        run: npm audit
+
+      - name: Run npm audit to check dependencies signatures
+        shell: bash
+        run: npm audit signatures
+
+
   trivy-scan-code:
     runs-on: self-hosted
 
@@ -23,19 +41,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
-
-      - name: Configure node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 #v4.4.0
-        with:
-          node-version: 24.1.0
-
-      - name: Run npm audit to find vulnerabilities on dependencies
-        shell: bash
-        run: npm audit
-
-      - name: Run npm audit to check dependencies signatures
-        shell: bash
-        run: npm audit signatures
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
