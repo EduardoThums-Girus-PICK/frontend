@@ -1,3 +1,7 @@
 # Accept the risk
 CVE-2021-3803
 CVE-2023-44270
+
+# Only affects local development
+CVE-2025-30359
+CVE-2025-30360

@@ -21,7 +21,6 @@ jobs:
         shell: bash
         run: npm audit signatures
 
-
   trivy-scan-code:
     runs-on: self-hosted
 
