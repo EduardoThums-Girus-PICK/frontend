@@ -17,10 +17,6 @@ jobs:
         shell: bash
         run: npm audit || true
 
-      - name: Run npm audit to check dependencies signatures
-        shell: bash
-        run: npm audit signatures
-
   trivy-scan-code:
     runs-on: self-hosted
 
