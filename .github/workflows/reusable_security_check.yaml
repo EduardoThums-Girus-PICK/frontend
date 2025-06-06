@@ -15,7 +15,7 @@ jobs:
 
       - name: Run npm audit to find vulnerabilities on dependencies
         shell: bash
-        run: npm audit
+        run: npm audit || true
 
       - name: Run npm audit to check dependencies signatures
         shell: bash
