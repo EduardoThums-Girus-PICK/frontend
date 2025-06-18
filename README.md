@@ -1,15 +1,15 @@
 
-# Desafio PICK Girus
+# 🚀 Desafio PICK Girus
 
 O arquivo `Dockerfile` da aplicação criado como parte da resolução do primeiro desafio PICK da 2ª turma de 2024.
 
 O objetivo era criar um imagem docker de uma aplicação em golang de forma otimizada, utilizando as melhores práticas de segurança e com o menor tamanho possível.
 
-### Frontend (React)
+### 🎨 Frontend (React)
 
 O frontend do GIRUS proporciona uma interface web moderna e responsiva para interação com os laboratórios. Desenvolvido com React, TypeScript e Material-UI, ele apresenta um terminal interativo, instruções de tarefas, e feedback visual sobre o progresso.
 
-#### Principais Recursos do Frontend
+#### 🧩 Principais Recursos do Frontend
 
 - **Terminal Interativo**: Implementado com xterm.js e conectado via WebSocket ao pod do laboratório
 - **Painel de Tarefas**: Exibe instruções passo a passo e botões de validação
@@ -17,7 +17,7 @@ O frontend do GIRUS proporciona uma interface web moderna e responsiva para inte
 - **Feedback Visual**: Indicadores de progresso e mensagens de validação
 - **Seletor de Laboratórios**: Interface para escolher entre os diferentes laboratórios disponíveis
 
-## Como buildar a imagem
+## 🛠️ Como buildar a imagem
 
 Para buildar a imagem serão necessários os seguintes pré-requisitos:
 
@@ -44,11 +44,11 @@ docker image build -t girus-frontend .
 docker image inspect girus-frontend
 ```
 
-## Como executar a imagem
+## ▶️ Como executar a imagem
 
 A imagem do frontend pode ser executada diretamente no docker, porém é recomendado que ela seja executada dentro de um cluster kubernetes para habilitar a conectividade com o backend.
 
-### Executando via docker
+### 🐳 Executando via docker
 
 Ao executar a aplicação via docker não será possível criar os laboratórios já que a aplicação do backend roda apenas dentro de um ecossitema kubernetes. 
 
@@ -66,9 +66,9 @@ docker ps | grep girus-frontend
 
 3. Acesse a aplicação do frontend rodando em http://localhost:8000
 
-### Executando via kubectl
+### ☸️ Executando via kubectl
 
-**IMPORTANTE ⚠️:** Para executar a aplicação via kubectl é obrigatório executar primeiramente o backend, para isso veja a documentação de como o faze-lo [aqui](https://github.com/EduardoThums-Girus-PICK/backend?tab=readme-ov-file#como-executar-a-imagem). 
+> ⚠️ Para executar a aplicação via kubectl é obrigatório executar primeiramente o backend, para isso veja a documentação de como o faze-lo [aqui](https://github.com/EduardoThums-Girus-PICK/backend?tab=readme-ov-file#como-executar-a-imagem). 
 
 1. Crie que namespace `girus`
 
@@ -194,7 +194,7 @@ kubectl -n girus port-forward services/girus-frontend 8000:8080
 
 6. Acesse o frontend no endereço http://localhost:8000
 
-## Como verificar a sua assinatura
+## 🔏 Como verificar a sua assinatura
 
 Para verificar a autenticidade da imagem é possível utilizar o programa `cosign` utilizando a parte pública da chave utilizada para assinar a imagem.
 
@@ -202,7 +202,7 @@ Para verificar a autenticidade da imagem é possível utilizar o programa `cosig
 cosign verify --key https://raw.githubusercontent.com/EduardoThums-Girus-PICK/cosign-pub-key/refs/heads/main/cosign.pub eduardothums/girus:frontend-v1.0.8
 ```
 
-## Sobre a construção da imagem
+## 🧱 Sobre a construção da imagem
 
 Abaixo está o arquivo `Dockerfile` utilizado para buildar a imagem, foi utilizado a técnica de multi-stage build para otimizar o tamanho final das layers, abaixo será explicado o funcionamento de cada comando agrupados por stage.
 
@@ -251,7 +251,7 @@ EXPOSE 8080
 HEALTHCHECK --interval=2s --timeout=5s --start-period=5s --retries=3 CMD ["/usr/local/bin/healthcheck"]
 ```
 
-### Stage de build do healthcheck
+### ⚙️ Stage de build do healthcheck
 
 ```Dockerfile
 # go:1.24.3
@@ -267,7 +267,7 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o healthcheck healthcheck.go
 
 3. Por fim compilamos o script de healthcheck com o comando `RUN go build` 
 
-### Stage de build
+### 🏗️ Stage de build
 
 ```Dockerfile
 # node:18.20.8
@@ -293,7 +293,7 @@ RUN npm run build
 4. Buildamos o projeto através do comando `RUN npm run build` que gera um diretório chamado `dist/` contendo os arquivos html, css e javascript otimizados.
 
 
-### Stage final
+### 🧩 Stage final
 
 ```Dockerfile
 # nginx:1.27.5
@@ -337,7 +337,7 @@ HEALTHCHECK --interval=2s --timeout=5s --start-period=5s --retries=3 CMD ["/usr/
 
 8. Não há necessidade de sobreescrever o `ENTRYPOINT` da imagem do nginx.
 
-## Fluxo do CI/CD
+## 🔄 Fluxo do CI/CD
 
 Utilizamos o GitHub Actions como plataforma de CI/CD do projeto, onde é realizado validações de segurança, boas práticas, build de imagems e publicações de releases através de tags do git.
 
@@ -346,7 +346,7 @@ Existem dois momentos onde os workflows definidos em `./github/workflows` são d
 1. `security_check.yaml`: quando há algum pull request aberto com a branch target apontando para a `main`
 2. `release.yaml`: quando uma tag é criada no repositório
 
-### security_check.yaml
+### 🛡️ `security_check.yaml`
 
 Este workflow tem como objetivo:
 
@@ -356,7 +356,7 @@ Este workflow tem como objetivo:
 
 3. Aplicar validações de boas práticas de criação de imagens com a ajuda do [Hadolint](https://github.com/hadolint/hadolint)
 
-### release.yaml
+### 🚢 `release.yaml`
 
 Este workflow tem como objetivo:
 
