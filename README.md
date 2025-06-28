@@ -369,3 +369,38 @@ Este workflow tem como objetivo:
 4. Assinar a imagem utilizando o [Cosign](https://docs.sigstore.dev/cosign/)
 
 5. Criar uma release com base na tag do git
+
+## 🤝 Contribuindo
+
+Contribuições são sempre bem-vindas! Se você deseja sugerir melhorias, corrigir bugs ou adicionar novas funcionalidades, siga os passos abaixo:
+
+### 🧭 Como colaborar
+
+1. **Fork** o repositório.
+2. Crie uma branch para sua feature ou correção:
+
+   ```bash
+   git checkout -b minha-contribuicao
+   ```
+3. Faça as alterações necessárias.
+4. Commit suas mudanças:
+
+   ```bash
+   git commit -m "feat: adiciona nova funcionalidade X"
+   ```
+5. Faça o push da sua branch:
+
+   ```bash
+   git push origin minha-contribuicao
+   ```
+6. **Abra um Pull Request** explicando suas alterações de forma clara.
+
+### 📝 Regras de contribuição
+
+* Mantenha o código limpo e legível.
+* Atualize a documentação, se necessário.
+* Adicione testes, se aplicável.
+
+### 💬 Dúvidas ou sugestões?
+
+Abra uma [issue](https://github.com/EduardoThums-Girus-PICK/frontend/issues) com sua pergunta, ideia ou problema!
