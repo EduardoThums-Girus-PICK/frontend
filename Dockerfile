@@ -1,5 +1,5 @@
 # go:1.24.4
-FROM cgr.dev/chainguard/go:latest@sha256:559ff5f15f50faa0185fb2453540e516bee651b62dad543ba7f947c219fdfe5a AS healthcheck_builder
+FROM cgr.dev/chainguard/go:latest@sha256:80839bcea32c932733ef1c6206b2b00f569932158bcd2ec9ea813fa56d4ea80d AS healthcheck_builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY healthcheck.go .
 RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o healthcheck healthcheck.go
 
 # node:24.1.0
-FROM cgr.dev/chainguard/node:latest@sha256:a2d0d24f74638473f2b92410a5199e1874f17ce12fab3c2d24b737340330456a AS builder
+FROM cgr.dev/chainguard/node:latest@sha256:bdf4392ef957016487dea5e10c5226f13e7bdcd0eded6113621852190453ac8b AS builder
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ COPY . .
 RUN npm run build
 
 # nginx:1.27.5
-FROM cgr.dev/chainguard/nginx:latest@sha256:fdee082ff9298e5d7249d152a2dc2d971ea1a41c2119d83f9006c05a42e1225d
+FROM cgr.dev/chainguard/nginx:latest@sha256:d566e593404d36448929ce07f1ff7c2cf71fd874669db877573f260937608859
 
 ARG revision
 ARG version
